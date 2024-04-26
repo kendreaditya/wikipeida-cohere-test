@@ -29,13 +29,15 @@ os.makedirs(index_dir, exist_ok=True)
 # )
 
 
+max_vectors = int(len(docs)*.75)
+
 # %%
 # Initialize the DynamicMemoryIndex
 index = diskannpy.DynamicMemoryIndex(
     distance_metric="mips",
     vector_dtype=np.float32,
     dimensions=768,
-    max_vectors=int(len(docs)*1.05),
+    max_vectors=max_vectors,
     complexity=196,
     graph_degree=128,
     num_threads=32,  # Adjust based on your system's number of threads
@@ -43,10 +45,14 @@ index = diskannpy.DynamicMemoryIndex(
 
 print("Index initialized.")
 
+# %%
+
 # Build the index incrementally
-for doc in tqdm(docs):
+for i in tqdm(range(0, max_vectors)):
+    doc = docs[i]
     embedding = np.array(doc['emb'], dtype=np.float32)
-    index.insert(embedding, doc['id'])
+    index.insert(embedding, np.uint32(doc['id']+1))
+    break
 
 print("Index built.")
 
@@ -54,3 +60,4 @@ index.save(index_dir, "wikipedia")
 
 print("Wikipedia dataset indexed with diskannpy.")
 print(f"Index saved to {index_dir}.")
+# %%
