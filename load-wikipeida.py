@@ -25,7 +25,7 @@ diskannpy.build_disk_index(
     graph_degree=128,
     search_memory_maximum=2,  # Adjust based on your system's memory
     build_memory_maximum=64,
-    num_threads=4,  # Adjust based on your system's number of threads
+    num_threads=12,  # Adjust based on your system's number of threads
 )
 
 print("Wikipedia dataset indexed with diskannpy.")
