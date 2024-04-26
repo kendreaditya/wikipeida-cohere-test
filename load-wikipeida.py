@@ -7,25 +7,43 @@ from tqdm import tqdm
 
 # %%
 # Load the Wikipedia dataset with embeddings
-docs = load_dataset("Cohere/wikipedia-22-12-en-embeddings", split="train")
+docs = load_dataset("Cohere/wikipedia-22-12-en-embeddings", split="train", cache_dir='./datasets-local')
 
 # Create a directory for the disk index
 index_dir = "./wikipedia-index"
 os.makedirs(index_dir, exist_ok=True)
 
-# Convert the dataset to a numpy array
-embeddings = np.array(docs['emb'], dtype=np.float32)
+# # Convert the dataset to a numpy array
+# embeddings = np.array(docs['emb'], dtype=np.float32)
 
-# Build the disk index
-diskannpy.build_disk_index(
-    data=embeddings,
-    distance_metric="mips",
+# # Build the disk index
+# diskannpy.build_disk_index(
+#     data=embeddings,
+#     distance_metric="mips",
+#     index_directory=index_dir,
+#     complexity=196,
+#     graph_degree=128,
+#     search_memory_maximum=2,  # Adjust based on your system's memory
+#     build_memory_maximum=64,
+#     num_threads=32,  # Adjust based on your system's number of threads
+# )
+
+
+# %%
+# Initialize the DynamicMemoryIndex
+index = diskannpy.DynamicMemoryIndex(
     index_directory=index_dir,
+    index_prefix="wikipedia",
+    distance_metric="mips",
+    vector_dtype=np.float32,
     complexity=196,
     graph_degree=128,
-    search_memory_maximum=2,  # Adjust based on your system's memory
-    build_memory_maximum=64,
-    num_threads=12,  # Adjust based on your system's number of threads
+    num_threads=32,  # Adjust based on your system's number of threads
 )
+
+# Build the index incrementally
+for doc in docs:
+    embedding = np.array(doc['emb'], dtype=np.float32)
+    index.insert(embedding, doc['id'])
 
 print("Wikipedia dataset indexed with diskannpy.")
