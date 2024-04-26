@@ -52,7 +52,6 @@ for i in tqdm(range(0, max_vectors)):
     doc = docs[i]
     embedding = np.array(doc['emb'], dtype=np.float32)
     index.insert(embedding, np.uint32(doc['id']+1))
-    break
 
 print("Index built.")
 
