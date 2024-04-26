@@ -32,8 +32,6 @@ os.makedirs(index_dir, exist_ok=True)
 # %%
 # Initialize the DynamicMemoryIndex
 index = diskannpy.DynamicMemoryIndex(
-    index_directory=index_dir,
-    index_prefix="wikipedia",
     distance_metric="mips",
     vector_dtype=np.float32,
     complexity=196,
@@ -41,9 +39,16 @@ index = diskannpy.DynamicMemoryIndex(
     num_threads=32,  # Adjust based on your system's number of threads
 )
 
+print("Index initialized.")
+
 # Build the index incrementally
 for doc in docs:
     embedding = np.array(doc['emb'], dtype=np.float32)
     index.insert(embedding, doc['id'])
 
+print("Index built.")
+
+index.save(index_dir, "wikipedia")
+
 print("Wikipedia dataset indexed with diskannpy.")
+print(f"Index saved to {index_dir}.")
