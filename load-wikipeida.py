@@ -33,6 +33,8 @@ os.makedirs(index_dir, exist_ok=True)
 # Initialize the DynamicMemoryIndex
 index = diskannpy.DynamicMemoryIndex(
     distance_metric="mips",
+    dimensions=768,
+    max_vectors=len(docs)*1.05,
     vector_dtype=np.float32,
     complexity=196,
     graph_degree=128,
