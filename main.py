@@ -1,40 +1,34 @@
 from fastapi import FastAPI
-import chromadb
-from chromadb.config import Settings
 import numpy as np
-import torch
 import cohere
+import diskannpy
+from datasets import load_dataset
 
 app = FastAPI()
 co = cohere.Client(f"<<COHERE_API_KEY>>")
 
-# Initialize the Chroma client
-client = chromadb.Client(Settings(
-    chroma_db_impl="deta",
-    persist_directory="./chroma-data"
-))
+docs = load_dataset("Cohere/wikipedia-22-12-en-embeddings", split="train")
 
-# Get the Wikipedia collection
-collection = client.get_collection("wikipedia")
+index_dir = "./wikipedia-index"
+
+# To search the index:
+index = diskannpy.StaticDiskIndex(index_dir, num_threads=4)
 
 @app.get("/search")
 def search_wikipedia(query: str, top_k: int = 10):
     # Encode the query using the Cohere model
     response = co.embed(texts=[query], model='multilingual-22-12')
-    query_embedding = torch.tensor(response.embeddings[0])
+    query_embedding = np.array(response.embeddings[0], dtype=np.float32)
 
     # Search the Chroma collection for the top k results
-    results = collection.query(
-        query_embeddings=query_embedding.numpy(),
-        n_results=top_k
-    )
+    results = index.search(query_embedding, k_neighbors=10, complexity=200)
 
     # Format the results
     output = []
     for i in range(top_k):
-        doc_id = results.ids[0][i]
-        doc_title = results.metadatas[0][doc_id]['title']
-        doc_text = results.documents[0][i]
+        doc_id = results.identifiers[i]
+        doc_title = docs[doc_id]['title']
+        doc_text = docs[doc_id]['text']
         output.append({
             'id': doc_id,
             'title': doc_title,
