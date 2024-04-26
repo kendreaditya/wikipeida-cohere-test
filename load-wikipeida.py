@@ -33,9 +33,9 @@ os.makedirs(index_dir, exist_ok=True)
 # Initialize the DynamicMemoryIndex
 index = diskannpy.DynamicMemoryIndex(
     distance_metric="mips",
-    dimensions=768,
-    max_vectors=len(docs)*1.05,
     vector_dtype=np.float32,
+    dimensions=768,
+    max_vectors=int(len(docs)*1.05),
     complexity=196,
     graph_degree=128,
     num_threads=32,  # Adjust based on your system's number of threads
@@ -44,7 +44,7 @@ index = diskannpy.DynamicMemoryIndex(
 print("Index initialized.")
 
 # Build the index incrementally
-for doc in docs:
+for doc in tqdm(docs):
     embedding = np.array(doc['emb'], dtype=np.float32)
     index.insert(embedding, doc['id'])
 
