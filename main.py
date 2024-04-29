@@ -7,7 +7,7 @@ from datasets import load_dataset
 app = FastAPI()
 co = cohere.Client(f"<<COHERE_API_KEY>>")
 
-docs = load_dataset("Cohere/wikipedia-22-12-en-embeddings", split="train")
+docs = load_dataset("Cohere/wikipedia-22-12-en-embeddings", split="train", cache_dir='./datasets-local')
 
 index_dir = "./wikipedia-index"
 
